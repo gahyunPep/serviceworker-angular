@@ -26,5 +26,17 @@
         ]
       }
     }
+  ],
+  "dataGroups": [
+    {
+      "name": "api-call",
+      "urls": ["http://dummy.restapiexample.com/api/v1/*"],
+      "cacheConfig": {
+        "maxAge": "12h",
+        "maxSize": 10,
+        "strategy": "freshness",
+        "timeout": "5s"
+      }
+    }
   ]
 }
