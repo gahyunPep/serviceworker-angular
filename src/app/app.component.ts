@@ -1,6 +1,6 @@
 import { ApplicationRef, Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { SwUpdate } from '@angular/service-worker';
+import { SwPush, SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 
 @Component({
@@ -11,16 +11,29 @@ import { interval } from 'rxjs';
 export class AppComponent {
   title = 'serviceworker-angular';
   apiData: any;
+  private publicKey =
+    'BBQTRzmj3bF1RQ45QmWpPujV_ELBnvkVgNK3OHCsUbMsDmq9rU9EB7xko8Wd95WaV_CsvxSv53ADoZKHkJD1GJE';
+
   constructor(
     private http: HttpClient,
     private update: SwUpdate,
-    private appRef: ApplicationRef
+    private appRef: ApplicationRef,
+    private swPush: SwPush
   ) {
     this.updateClient();
     this.checkUpdate();
   }
 
   ngOnInit() {
+    this.pushSubscription(); // better to put under the event
+
+    this.swPush.messages.subscribe((message) => console.log(message));
+
+    this.swPush.notificationClicks.subscribe(({ action, notification }) => {
+      window.open(notification.data.url);
+      // use only fetch no httpclient
+    });
+
     this.http.get(`http://dummy.restapiexample.com/api/v1/employees`).subscribe(
       (res: any) => {
         this.apiData = res.data;
@@ -51,7 +64,7 @@ export class AppComponent {
   checkUpdate() {
     this.appRef.isStable.subscribe((isStable) => {
       if (isStable) {
-        const timeInterval = interval(15000);
+        const timeInterval = interval(8 * 60 * 60 * 1000);
 
         timeInterval.subscribe(() => {
           this.update.checkForUpdate().then(() => console.log('checked'));
@@ -59,5 +72,21 @@ export class AppComponent {
         });
       }
     });
+  }
+
+  pushSubscription() {
+    if (!this.swPush.isEnabled) {
+      console.log('Notification is not enabled');
+      return;
+    }
+    this.swPush
+      .requestSubscription({
+        serverPublicKey: this.publicKey,
+      })
+      .then((sub) => {
+        // supposed to send post request to the server with sub obj
+        console.log(JSON.stringify(sub));
+      })
+      .catch((err) => console.log(err));
   }
 }
