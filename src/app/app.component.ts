@@ -89,4 +89,25 @@ export class AppComponent {
       })
       .catch((err) => console.log(err));
   }
+
+  postSync() {
+    // api call
+    let obj = {
+      name: 'amber',
+    };
+    this.http.post('http://localhost:3000/data', obj).subscribe(
+      (res) => {
+        console.log(res);
+      },
+      (err) => {
+        this.backgroundSync();
+      }
+    );
+  }
+
+  backgroundSync() {
+    navigator.serviceWorker.ready
+      .then((swRegistration) => swRegistration.sync.register('post-data'))
+      .catch((err) => console.log(err));
+  }
 }

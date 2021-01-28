@@ -13,7 +13,7 @@ import { environment } from '../environments/environment';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
+    ServiceWorkerModule.register('service-worker.js', {
       enabled: environment.production,
     }),
   ],
