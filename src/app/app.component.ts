@@ -1,3 +1,4 @@
+import { IndexedDBService } from './services/indexed-db.service';
 import { ApplicationRef, Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { SwPush, SwUpdate } from '@angular/service-worker';
@@ -18,7 +19,8 @@ export class AppComponent {
     private http: HttpClient,
     private update: SwUpdate,
     private appRef: ApplicationRef,
-    private swPush: SwPush
+    private swPush: SwPush,
+    private indexedDBService: IndexedDBService
   ) {
     this.updateClient();
     this.checkUpdate();
@@ -74,6 +76,7 @@ export class AppComponent {
     });
   }
 
+  // push notification
   pushSubscription() {
     if (!this.swPush.isEnabled) {
       console.log('Notification is not enabled');
@@ -90,6 +93,7 @@ export class AppComponent {
       .catch((err) => console.log(err));
   }
 
+  // Background sync in service worker
   postSync() {
     // api call
     let obj = {
@@ -100,7 +104,10 @@ export class AppComponent {
         console.log(res);
       },
       (err) => {
-        this.backgroundSync();
+        this.indexedDBService
+          .addUser('Amber Lee')
+          .then(this.backgroundSync)
+          .catch(console.log);
       }
     );
   }
