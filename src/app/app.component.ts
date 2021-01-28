@@ -3,6 +3,7 @@ import { ApplicationRef, Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { SwPush, SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
@@ -20,13 +21,32 @@ export class AppComponent {
     private update: SwUpdate,
     private appRef: ApplicationRef,
     private swPush: SwPush,
-    private indexedDBService: IndexedDBService
+    private indexedDBService: IndexedDBService,
+    private _snackBar: MatSnackBar
   ) {
     this.updateClient();
     this.checkUpdate();
   }
 
   ngOnInit() {
+    // check if user is online or not approach 1- this will only run once when it is loaded
+    // if (!navigator.onLine) {
+    //   alert('Please check your internet connection');
+    // }
+
+    addEventListener('offline', (event) => {
+      this._snackBar.open('Please check your internet connection', 'OK', {
+        duration: 5000,
+      });
+      // you can do background sync here
+    });
+
+    addEventListener('online', (event) => {
+      this._snackBar.open('You are online now', 'OK', {
+        duration: 2000,
+      });
+    });
+
     this.pushSubscription(); // better to put under the event
 
     this.swPush.messages.subscribe((message) => console.log(message));
